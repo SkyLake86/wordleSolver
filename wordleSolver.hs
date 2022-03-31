@@ -1,7 +1,9 @@
 
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# HLINT ignore "Use lambda-case" #-}
+{-# HLINT ignore "Avoid lambda using `infix`" #-}
 import Data.Char (toLower)
+import Data.Maybe (fromJust)
 {-# HLINT ignore "Eta reduce" #-}
 
 type Dict = [String]
@@ -20,18 +22,32 @@ parseColors res = traverse (\c -> case c of 'B' -> Just Black
 formatGuess :: String -> String
 formatGuess str = toLower <$> take 5 str
 
-parseGuessToResult :: String -> [Color] -> [Result]
-parseGuessToResult word col = pom L1 word col
+parseGuessToResult :: String -> Maybe [Color] -> [Result]
+parseGuessToResult word col = pom L1 word (fromJust col)
     where pom pst (w:ws) (c:cs) | c == Black = BL w pst:pom (succ pst) ws cs
                                 | c == Yellow = YE w pst:pom (succ pst) ws cs
                                 | c == Green = GR w pst:pom (succ pst) ws cs
           pom _ [] [] = []
           pom _ _ _ = error "<<< parseGuessToResult error >>>"
 
+positionToInt pos = case pos of L1 -> 0
+                                L2 -> 1
+                                L3 -> 2
+                                L4 -> 3
+                                L5 -> 4
 
+filterStringByResult :: String -> [Result] -> Bool
+filterStringByResult str rslt = pom str rslt
+    where   pom str ((BL letter postion):slt) = (str !! positionToInt postion) /= letter && pom str slt
+            pom str ((YE letter postion):slt) = (str !! positionToInt postion) /= letter && elem letter str && pom str slt
+            pom str ((GR letter postion):slt) = (str !! positionToInt postion) == letter && pom str slt
+            pom str [] = True
 
+filterDict :: [Result] -> Dict -> Dict
+filterDict rslt dct = filter (\x -> filterStringByResult x rslt) dct
 
 main :: IO()
 main = do
     dct <- lines <$> readFile "words.txt"
     putStrLn ("3rd word in the file is "  ++ dct !! 2)
+     
