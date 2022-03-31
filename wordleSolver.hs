@@ -66,14 +66,14 @@ main = do
     let getResult = do
         putStrLn "What was the result?"
         result <- getLine
-        if length result == 5 && all (`elem` ['a'..'z']) result then return result else do 
+        if length result == 5 && all (`elem` ['B','Y','G']) result then return result else do 
             putStrLn "The result is formatted wrong. It has to be 5 letters long. \nB - black \nY - Yellow \nG - Green \n. Try to enter again. "
             getResult
 
     let getGuess = do
         putStrLn "What was your guess?"
         guess <- getLine
-        if length guess == 5 && all (`elem` ['B','Y','G']) guess then return guess else do 
+        if length guess == 5 && all (`elem` ['a'..'z']) guess then return guess else do 
             putStrLn "The result is formatted wrong. It has to be 5 letters long, all lowercase. Try to enter again. "
             getGuess
 
