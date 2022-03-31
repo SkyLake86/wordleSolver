@@ -13,13 +13,10 @@ data Color = Black | Yellow | Green deriving (Eq, Show)
 data Result = BL Char Position | YE Char Position | GR Char Position deriving (Show, Eq)
 
 parseColors :: String -> Maybe [Color]
-parseColors res = Just (pom res 5)
-    where   pom ('B':es) n = Black:pom es (n-1)
-            pom ('Y':es) n = Yellow:pom es (n-1)
-            pom ('G':es) n = Green:pom es (n-1)
-            pom _ 0 = []
-            pom _ _ = error "zły format"
-            
+parseColors res = traverse (\c -> case c of 'B' -> Just Black
+                                            'Y' -> Just Yellow
+                                            'G' -> Just Green
+                                            _ -> Nothing ) res
 formatGuess :: String -> String
 formatGuess str = toLower <$> take 5 str
 
