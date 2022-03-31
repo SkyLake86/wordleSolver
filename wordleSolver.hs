@@ -48,17 +48,6 @@ filterStringByResult str rslt = pom str rslt
 filterDict :: [Result] -> Dict -> Dict
 filterDict rslt dct = filter (\x -> filterStringByResult x rslt) dct
 
-
-
-
-
-
-searchLoop dct = pom dct
-    where   pom [oneWord] = oneWord
-            pom dct = filterDict
-
-
-
 main :: IO()
 main = do
     predct <- lines <$> readFile "words.txt"
@@ -77,22 +66,20 @@ main = do
             putStrLn "The result is formatted wrong. It has to be 5 letters long, all lowercase. Try to enter again. "
             getGuess
 
+    let updateDictionary (guess,result) dict = do 
+        let newDict = filterDict (parseGuessToResult guess (parseColors result)) dict
+        return newDict
+
     let loop dictionary (guess,result)
                 | null dictionary = putStrLn "The correct solution is not in my database"
                 | length dictionary == 1 = putStrLn ("The only possibily is: " ++ head dictionary)
                 | otherwise = do
+                    putStrLn "All possible words are: \n"
+                    print dictionary
                     newGuess <- getGuess
                     newResult <- getResult
-                    let newdct = filterDict (parseGuessToResult newGuess (parseColors newResult)) dictionary
-                    putStrLn "All possible words are: \n"
-                    print newdct
-                    loop newdct (newGuess, newResult)
-
-    let updateDictionary (guess,result) dict = do 
-        let newDict = filterDict (parseGuessToResult guess (parseColors result)) dict
-        putStrLn "All possible words are: \n"
-        print newDict
-        return newDict
+                    newDict <- updateDictionary(newGuess, newResult) dictionary
+                    loop newDict (newGuess, newResult)
 
 
     firstGuess <- getGuess
@@ -103,8 +90,8 @@ main = do
 
     let theEnd = do
         putStrLn "Do you want to play again (press a) or quit (press q) ?"
-        getLine  >>= \letter ->
-                    case letter of  "a" -> main
-                                    "q" -> putStrLn "OK!"
-                                    _ -> theEnd
+        letter <- getLine 
+        case letter of  "a" -> main
+                        "q" -> putStrLn "OK!"
+                        _ -> theEnd
     theEnd
