@@ -70,23 +70,25 @@ main = do
         let newDict = filterDict (parseGuessToResult guess (parseColors result)) dict
         return newDict
 
-    let loop dictionary (guess,result)
+    let loop dictionary (guess,result) guessCount
                 | null dictionary = putStrLn "The correct solution is not in my database"
                 | length dictionary == 1 = putStrLn ("The only possibily is: " ++ head dictionary)
                 | otherwise = do
                     putStrLn "All possible words are: \n"
                     print dictionary
+                    putStrLn ("\n\nGuess no. " ++ show guessCount)
                     newGuess <- getGuess
                     newResult <- getResult
                     newDict <- updateDictionary(newGuess, newResult) dictionary
-                    loop newDict (newGuess, newResult)
+                    loop newDict (newGuess, newResult) (guessCount+1)
 
-
+    putStrLn "Guess no. 1"
     firstGuess <- getGuess
     firstResult <- getResult
     dict <- updateDictionary (firstGuess, firstResult) predct
 
-    loop dict (firstGuess,firstResult)
+
+    loop dict (firstGuess,firstResult) 2
 
     let theEnd = do
         putStrLn "Do you want to play again (press a) or quit (press q) ?"
